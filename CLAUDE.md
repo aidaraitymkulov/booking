@@ -42,6 +42,17 @@ Feature-based layout. Layers inside `src/features/bookings/`:
 - Past dates: creation is blocked; for today, elapsed slots are unavailable.
 - The mock server validates everything itself: 400 for invalid input, 409 for a conflict. On 409 the UI shows a clear message, refetches, keeps the form open and does not reset the entered values.
 
+## Design system
+
+Tokens live in `src/index.css` (OKLCH, light + `.dark`, brand hue 265 indigo, cool-tinted neutrals). All token pairs were checked against WCAG AA (≥ 4.5:1 for text) — re-check if you change a value.
+
+- Colors only via token utilities (`bg-primary`, `text-muted-foreground`, `border-border`, ...). No raw hex/oklch values or Tailwind palette colors (`bg-indigo-500`) in components.
+- Beyond the shadcn defaults: `success`, `warning`, `destructive-foreground`, and `booked` (+ `booked-foreground`, `booked-border`) for occupied slots/existing bookings in the timeline.
+- Every `*-foreground` token is meant to sit on its own background token (`bg-booked text-booked-foreground`).
+- Radius scale derives from `--radius`; font is Geist Variable (`font-sans`).
+- Dark mode: `next-themes` `ThemeProvider` (class strategy) in `src/app/providers.tsx`, which also mounts the TanStack `QueryClientProvider` and the sonner `Toaster`.
+- Global `:focus-visible` ring and `prefers-reduced-motion` handling are in `@layer base`; do not remove outlines in components.
+
 ## Code conventions
 
 These rules are mandatory for new code.
