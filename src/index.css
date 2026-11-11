@@ -5,15 +5,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/*
- * Design tokens (OKLCH). Palette: calm indigo brand + cool-tinted neutrals (hue 265).
- * Semantic tokens beyond shadcn defaults:
- *   success / warning — status feedback
- *   booked            — an occupied slot / existing booking in the timeline
- * Use tokens via Tailwind utilities (bg-primary, text-muted-foreground, bg-booked ...),
- * never raw colors in components.
- */
-
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
@@ -135,6 +126,11 @@
   }
   body {
     @apply min-h-svh bg-background text-foreground;
+  }
+  button:not(:disabled),
+  [role='button']:not(:disabled),
+  [role='option']:not([aria-disabled='true']) {
+    cursor: pointer;
   }
   :focus-visible {
     @apply ring-[3px] ring-ring/50 outline-none;
