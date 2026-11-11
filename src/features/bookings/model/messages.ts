@@ -17,6 +17,8 @@ const ISSUE_MESSAGES: Record<BookingIssueCode, string> = {
   PAST_TIME: 'Это время уже прошло',
 }
 
+export const RULES_HINT = `Рабочее время ${toHHmm(WORK_START)}–${toHHmm(WORK_END)} · длительность от ${formatDuration(MIN_DURATION)} до ${formatDuration(MAX_DURATION)}`
+
 export const getIssueMessage = (code: BookingIssueCode): string =>
   ISSUE_MESSAGES[code]
 

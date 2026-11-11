@@ -1,8 +1,6 @@
 import { formatLocalDate } from '@/features/bookings/model/time'
 import type { Booking } from '@/features/bookings/model/types'
 
-// Dates are relative to "now": past dates cannot be booked, so a fixed seed
-// would look empty on the demo a day later.
 export const createSeed = (now: Date = new Date()): Booking[] => {
   const today = formatLocalDate(now)
   const tomorrow = formatLocalDate(

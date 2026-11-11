@@ -31,7 +31,6 @@ export default defineConfig([
     },
   },
   {
-    // shadcn-компоненты экспортируют компонент вместе с variants/хуками
     files: ['src/components/ui/**'],
     rules: { 'react-refresh/only-export-components': 'off' },
   },

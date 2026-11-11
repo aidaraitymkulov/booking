@@ -2,18 +2,17 @@ import type { Booking, BookingDraft } from '@/features/bookings/model/types'
 
 import { createSeed } from './seed'
 
-// Persisted so bookings survive a page reload during the demo.
 const STORAGE_KEY = 'booking-mock-db'
 
 const load = (): Booking[] => {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    const parsed: unknown = raw ? JSON.parse(raw) : null
-    if (Array.isArray(parsed)) return parsed as Booking[]
+    const parsed: unknown = JSON.parse(
+      localStorage.getItem(STORAGE_KEY) ?? 'null',
+    )
+    return Array.isArray(parsed) ? (parsed as Booking[]) : createSeed()
   } catch {
-    // storage unavailable or corrupted: fall back to the seed
+    return createSeed()
   }
-  return createSeed()
 }
 
 let bookings: Booking[] = load()
@@ -22,7 +21,7 @@ const persist = () => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings))
   } catch {
-    // keep working in memory only
+    return
   }
 }
 

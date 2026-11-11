@@ -7,7 +7,6 @@ import type { Booking } from '@/features/bookings/model/types'
 import { db } from './db'
 import { handlers } from './handlers'
 
-// Far in the future so the tests do not depend on today's date.
 const DATE = '2099-01-01'
 const OTHER_DATE = '2099-01-02'
 
@@ -288,7 +287,6 @@ describe('?simulate409', () => {
       start: '10:00',
       end: '11:00',
     })
-    // the refetch after the 409 must show who took the slot
     expect(db.listByDate(DATE)).toHaveLength(1)
   })
 

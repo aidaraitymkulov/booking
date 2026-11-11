@@ -97,12 +97,10 @@ describe('formatLocalDate / parseLocalDate', () => {
 
 describe('getTodayLocal', () => {
   it('uses the local date, not UTC, right after midnight', () => {
-    // toISOString() would give the previous day for timezones ahead of UTC.
     expect(getTodayLocal(new Date(2026, 0, 1, 0, 30))).toBe('2026-01-01')
   })
 
   it('uses the local date late in the evening', () => {
-    // toISOString() would give the next day for timezones behind UTC.
     expect(getTodayLocal(new Date(2026, 0, 1, 23, 30))).toBe('2026-01-01')
   })
 })

@@ -19,7 +19,6 @@ import { db } from './db'
 
 const BOOKINGS_URL = '/api/bookings'
 
-// Artificial latency so loading and pending states are visible.
 const LATENCY_MS = import.meta.env.MODE === 'test' ? 0 : 400
 
 const RACE_COMPETITOR_TITLE = 'Занято другим пользователем'
@@ -60,12 +59,6 @@ const notFoundResponse = () =>
 
 const normalizeTitle = (title: string | undefined) => title?.trim() || undefined
 
-/**
- * Demo of the race condition: open the app with `?simulate409` and the server
- * behaves as if another user booked the same free slot a moment earlier. The
- * competing booking is really stored, so the refetch after the 409 shows it.
- * Only applies when the slot is actually free.
- */
 const simulateRace = (draft: BookingDraft): Booking | undefined => {
   const isEnabled =
     typeof window !== 'undefined' &&
@@ -136,7 +129,6 @@ export const handlers = [
     const issues = validateBooking(draft)
     if (issues.length > 0) return validationResponse(issues)
 
-    // excludeId: a booking must not conflict with itself.
     const conflict = findConflict(draft, db.all(), id) ?? simulateRace(draft)
     if (conflict) return conflictResponse(conflict)
 

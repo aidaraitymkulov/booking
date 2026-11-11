@@ -5,8 +5,6 @@ import { App } from './App'
 import { Providers } from './app/providers'
 import './index.css'
 
-// Mock API (MSW). Started in production too: the demo has no real backend.
-// To switch to a real API, remove this function and the src/mocks folder.
 const enableMocking = async () => {
   const { worker } = await import('./mocks/browser')
   await worker.start({

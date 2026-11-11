@@ -38,7 +38,6 @@ export const isValidDate = (value: string): boolean => {
   )
 }
 
-// Local date, not toISOString(): that one is UTC and shifts the day near midnight.
 export const formatLocalDate = (date: Date): string =>
   `${pad(date.getFullYear(), 4)}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
 

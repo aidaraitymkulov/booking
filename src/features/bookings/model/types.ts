@@ -1,8 +1,8 @@
 export type Booking = {
   id: string
-  date: string // YYYY-MM-DD, local date
-  start: string // HH:mm
-  end: string // HH:mm
+  date: string
+  start: string
+  end: string
   title?: string
 }
 

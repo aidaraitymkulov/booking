@@ -9,7 +9,6 @@ import {
 } from './rules'
 import type { Booking, BookingDraft } from './types'
 
-// Tuesday 2026-11-10, 12:00 local time
 const NOW = new Date(2026, 10, 10, 12, 0)
 const TODAY = '2026-11-10'
 const FUTURE = '2026-11-11'

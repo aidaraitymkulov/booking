@@ -1,36 +1,27 @@
-import { apiClient } from '@/shared/api/client'
+import { apiClient } from '@/shared/api/api'
 
 import type { Booking } from '../model/types'
 
-import { toBookingError } from './errors'
 import type { CreateBookingDto, UpdateBookingDto } from './types'
 
-const request = async <T>(call: () => Promise<{ data: T }>): Promise<T> => {
-  try {
-    const { data } = await call()
-    return data
-  } catch (error) {
-    throw toBookingError(error)
-  }
+export const getBookings = async (date: string, signal?: AbortSignal) => {
+  const { data } = await apiClient.get<Booking[]>('/bookings', {
+    params: { date },
+    signal,
+  })
+  return data
 }
 
-export const getBookings = (
-  date: string,
-  signal?: AbortSignal,
-): Promise<Booking[]> =>
-  request(() =>
-    apiClient.get<Booking[]>('/bookings', { params: { date }, signal }),
-  )
+export const createBooking = async (dto: CreateBookingDto) => {
+  const { data } = await apiClient.post<Booking>('/bookings', dto)
+  return data
+}
 
-export const createBooking = (dto: CreateBookingDto): Promise<Booking> =>
-  request(() => apiClient.post<Booking>('/bookings', dto))
+export const updateBooking = async (id: string, dto: UpdateBookingDto) => {
+  const { data } = await apiClient.patch<Booking>(`/bookings/${id}`, dto)
+  return data
+}
 
-export const updateBooking = (
-  id: string,
-  dto: UpdateBookingDto,
-): Promise<Booking> =>
-  request(() => apiClient.patch<Booking>(`/bookings/${id}`, dto))
-
-export const deleteBooking = async (id: string): Promise<void> => {
-  await request(() => apiClient.delete(`/bookings/${id}`))
+export const deleteBooking = async (id: string) => {
+  await apiClient.delete(`/bookings/${id}`)
 }
