@@ -1,73 +1,90 @@
-# React + TypeScript + Vite
+# Бронирование переговорной
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Интерфейс бронирования одной переговорной комнаты на рабочий день (09:00–18:00).
 
-Currently, two official plugins are available:
+Демо: _ссылка будет после деплоя_
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Запуск
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Приложение откроется на `http://localhost:5173`. Бэкенд не нужен: API имитирует MSW прямо в браузере.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Команда           | Что делает                         |
+| ----------------- | ---------------------------------- |
+| `npm run dev`     | dev-сервер                         |
+| `npm run build`   | проверка типов и production-сборка |
+| `npm run preview` | запуск собранной версии            |
+| `npm test`        | юнит-тесты (Vitest)                |
+| `npm run lint`    | ESLint                             |
+| `npm run format`  | Prettier                           |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Стек
+
+Vite, React 19, TypeScript, TanStack Query, React Hook Form + Zod, axios, Tailwind CSS v4, shadcn/ui, MSW, Vitest.
+
+**Почему Vite, а не Next.js.** Приложение полностью клиентское: SSR, ISR и серверные компоненты здесь не нужны. Кроме того, мок на Route Handlers в serverless-окружении (Vercel) хранил бы данные в памяти, которая не гарантирована между вызовами. MSW работает в браузере, поэтому такой проблемы нет.
+
+## Что сделано
+
+**Функционал**
+
+- Выбор даты: стрелки «предыдущий/следующий день», календарь, кнопка «Сегодня».
+- Просмотр броней дня на таймлайне 09:00–18:00 со слотами по 30 минут.
+- Создание, редактирование и удаление брони (удаление с подтверждением).
+- Время начала и конца вводится в формате `ЧЧ:ММ` (24 часа), название необязательно.
+- Кнопка «Забронировать» открывает форму на ближайшем свободном слоте.
+
+**Бизнес-правила**
+
+- Время в пределах 09:00–18:00, `start < end`, длительность от 30 минут до 2 часов.
+- Брони не пересекаются, касание границ допустимо (10:00–11:00 и 11:00–12:00).
+- Прошедшее время бронировать нельзя: на сегодня прошедшие слоты недоступны, для прошедших дат создание заблокировано, об этом сообщается на экране.
+- При редактировании бронь не конфликтует сама с собой.
+
+**Конфликт 409.** Сервер может отклонить бронь, даже если слот выглядел свободным. В этом случае форма остаётся открытой со всеми введёнными значениями, показывается понятное сообщение, а список броней обновляется. Чтобы увидеть это самому, откройте приложение с параметром `?simulate409`: свободный слот будет отклонён с 409, а «конкурирующая» бронь реально сохранится и появится на таймлайне.
+
+**Состояния UI:** загрузка (скелетон), пустой день, ошибка загрузки с кнопкой «Повторить», отправка формы (кнопки блокируются, текст «Сохранение…»), тосты об успехе.
+
+**Адаптивность и доступность:** раскладка работает на узких экранах без горизонтальной прокрутки (проверено на 390 px); у всех полей есть подписи; слоты и брони это кнопки с `aria-label`, доступные с клавиатуры; видимый фокус; учитывается `prefers-reduced-motion`; цвета проверены на контраст WCAG AA; есть светлая и тёмная темы (по настройке системы).
+
+## Архитектура
+
 ```
+src/
+  features/bookings/
+    model/    чистая логика без React и сети: время, правила, схема формы, тексты
+    api/      эндпоинты и типы запросов
+    hooks/    обёртки TanStack Query
+    ui/       компоненты
+  mocks/      весь «сервер»: хендлеры MSW, хранилище, начальные данные
+  shared/     общий axios-инстанс
+  components/ui/   компоненты shadcn
+```
+
+- **Правила написаны один раз.** `validateBooking`, `findConflict` и `hasOverlap` лежат в `model/rules.ts` и используются и формой, и мок-сервером. Поэтому UI и «сервер» не могут разойтись. Сервер сам валидирует всё: 400 для невалидных данных, 409 для конфликта, 404 для неизвестной брони.
+- **Время хранится в минутах от полуночи** внутри логики, а формат `ЧЧ:ММ` существует только на границе UI и API.
+- **«Сегодня» считается по локальной дате,** а не через `toISOString()`, чтобы не получить ошибку «вчера/сегодня» в часовых поясах правее UTC.
+- **Сетевой слой отделён от UI.** Компоненты ходят только в хуки, хуки в `api/`. Чтобы заменить мок на настоящий API, достаточно удалить папку `src/mocks` и вызов `enableMocking()` в `main.tsx`.
+- **Мутации всегда обновляют список,** в том числе при ошибке: после 409 пользователь сразу видит актуальные брони.
+- Мок хранит данные в `localStorage`, поэтому брони переживают перезагрузку страницы. Начальные данные привязаны к сегодняшней дате.
+
+## Тесты
+
+```bash
+npm test
+```
+
+Тесты покрывают бизнес-логику: работа со временем и датами, все правила валидации и пересечений (включая границы и редактирование), доступность слотов и ближайший свободный слот, а также ответы мок-сервера (400, 404, 409, `?simulate409`). Компоненты и инфраструктурный код (axios, провайдеры) я намеренно не тестировал.
+
+## Что не сделано и что доделал бы
+
+- **Индикатор «сейчас»** на таймлайне и быстрый выбор длительности в форме (30 мин, 1 ч, 1,5 ч, 2 ч).
+- **Маска ввода времени.** Сейчас двоеточие вводится вручную, а `9:30` отвергается с понятным сообщением.
+- **Компонентные и e2e-тесты** (Testing Library, Playwright): приоритет отдан логике и обработке ошибок.
+- **Переключатель темы** вручную: сейчас тема следует за настройкой системы.
+- **Редактирование уже прошедшей брони недоступно:** сервер вернёт 400, поэтому такие брони на таймлайне только для просмотра. Это моё решение.
+- Пустой день выглядит шумно (18 пунктирных слотов): можно объединять подряд идущие свободные слоты.
